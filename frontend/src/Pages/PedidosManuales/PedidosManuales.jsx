@@ -3,6 +3,13 @@ import styles from "./PedidosManuales.module.css";
 
 const PedidosManuales = () => {
   const [manualOrders, setManualOrders] = useState([]);
+  const [menuConfigs, setMenuConfigs] = useState({
+    alitas: [],
+    papas: [],
+    salsas: [],
+    bebidas: [],
+  });
+
   const [form, setForm] = useState({
     numero: "",
     direccion: "",
@@ -22,12 +29,28 @@ const PedidosManuales = () => {
     ],
   });
 
-  // === Cargar pedidos ya registrados ===
+  // === Cargar pedidos manuales ===
   useEffect(() => {
     fetch("http://localhost:3000/pedidos-manuales")
       .then((res) => res.json())
       .then(setManualOrders)
       .catch((err) => console.error("Error cargando pedidos:", err));
+  }, []);
+
+  // === Cargar configuración del menú ===
+  useEffect(() => {
+    fetch("http://localhost:3000/config")
+      .then((res) => res.json())
+      .then((data) => {
+        // Estructura esperada: { alitas: [...], papas: [...], salsas: [...], bebidas: [...] }
+        setMenuConfigs({
+          alitas: data?.alitas || [],
+          papas: data?.papas || [],
+          salsas: data?.salsas || [],
+          bebidas: data?.bebidas || [],
+        });
+      })
+      .catch((err) => console.error("Error cargando configuración del menú:", err));
   }, []);
 
   // === Funciones para combos ===
@@ -71,7 +94,7 @@ const PedidosManuales = () => {
     setForm({ ...form, combos: newCombos });
   };
 
-  // === Enviar pedido ===
+  // === Registrar pedido ===
   const handleSubmit = async () => {
     if (!form.numero || !form.total || form.combos.length === 0) {
       alert("Debes llenar los campos principales y al menos un combo.");
@@ -121,159 +144,246 @@ const PedidosManuales = () => {
         <p>Agrega pedidos recibidos por teléfono o en persona</p>
       </div>
 
-      {/* === Formulario === */}
       <div className={styles.formCard}>
         <h2>Registrar Nuevo Pedido</h2>
 
-        <div className={styles.form}>
-          <input
-            type="text"
-            placeholder="Número (Ej: 573108121498)"
-            value={form.numero}
-            onChange={(e) => setForm({ ...form, numero: e.target.value })}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            placeholder="Dirección"
-            value={form.direccion}
-            onChange={(e) => setForm({ ...form, direccion: e.target.value })}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            placeholder="Apartamento / Torre"
-            value={form.apartamento}
-            onChange={(e) => setForm({ ...form, apartamento: e.target.value })}
-            className={styles.input}
-          />
-          <input
-            type="text"
-            placeholder="Hora de entrega (Ej: Ya mismo)"
-            value={form.horaEntrega}
-            onChange={(e) => setForm({ ...form, horaEntrega: e.target.value })}
-            className={styles.input}
-          />
-          <textarea
-            placeholder="Observaciones"
-            value={form.observaciones}
-            onChange={(e) =>
-              setForm({ ...form, observaciones: e.target.value })
-            }
-            className={styles.textarea}
-          />
-          <select
-            value={form.metodoPago}
-            onChange={(e) =>
-              setForm({ ...form, metodoPago: e.target.value })
-            }
-            className={styles.input}
-          >
-            <option value="Efectivo">Efectivo</option>
-            <option value="Nequi">Nequi</option>
-            <option value="Daviplata">Daviplata</option>
-          </select>
-          <input
-            type="number"
-            placeholder="Total (Ej: 56000)"
-            value={form.total}
-            onChange={(e) => setForm({ ...form, total: e.target.value })}
-            className={styles.input}
-          />
-
-          {/* === Sección Combos === */}
-          <h3>Combos</h3>
-          {form.combos.map((combo, index) => (
-            <div key={index} className={styles.comboCard}>
-              <h4>Combo {index + 1}</h4>
-              <input
-                type="text"
-                placeholder="Tipo de alitas"
-                value={combo.tipoAlitas}
-                onChange={(e) =>
-                  handleComboChange(index, "tipoAlitas", e.target.value)
-                }
-                className={styles.input}
-              />
-              <input
-                type="text"
-                placeholder="Tipo de papas"
-                value={combo.papas}
-                onChange={(e) =>
-                  handleComboChange(index, "papas", e.target.value)
-                }
-                className={styles.input}
-              />
-              <label>
+        {/* === TABLA 1: Datos generales === */}
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th colSpan="2">Datos del Pedido</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Número</td>
+              <td>
                 <input
-                  type="checkbox"
-                  checked={combo.vegetales}
-                  onChange={(e) =>
-                    handleComboChange(index, "vegetales", e.target.checked)
-                  }
+                  type="text"
+                  placeholder="Ej: 573108121498"
+                  value={form.numero}
+                  onChange={(e) => setForm({ ...form, numero: e.target.value })}
+                  className={styles.input}
                 />
-                Incluir vegetales
-              </label>
-
-              <div className={styles.salsasSection}>
-                <p>Salsas:</p>
-                {combo.salsas.map((salsa, iSalsa) => (
-                  <div key={iSalsa} className={styles.salsaItem}>
-                    <input
-                      type="text"
-                      placeholder={`Salsa ${iSalsa + 1}`}
-                      value={salsa}
-                      onChange={(e) =>
-                        handleSalsaChange(index, e.target.value, iSalsa)
-                      }
-                      className={styles.inputSmall}
-                    />
-                    <button
-                      onClick={() => removeSalsa(index, iSalsa)}
-                      className={styles.btnSmall}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => addSalsa(index)}
-                  className={styles.btnAddSmall}
+              </td>
+            </tr>
+            <tr>
+              <td>Dirección</td>
+              <td>
+                <input
+                  type="text"
+                  placeholder="Dirección"
+                  value={form.direccion}
+                  onChange={(e) =>
+                    setForm({ ...form, direccion: e.target.value })
+                  }
+                  className={styles.input}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>Apartamento</td>
+              <td>
+                <input
+                  type="text"
+                  placeholder="Apartamento / Torre"
+                  value={form.apartamento}
+                  onChange={(e) =>
+                    setForm({ ...form, apartamento: e.target.value })
+                  }
+                  className={styles.input}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>Hora de Entrega</td>
+              <td>
+                <input
+                  type="text"
+                  placeholder="Ej: Ya mismo"
+                  value={form.horaEntrega}
+                  onChange={(e) =>
+                    setForm({ ...form, horaEntrega: e.target.value })
+                  }
+                  className={styles.input}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>Observaciones</td>
+              <td>
+                <textarea
+                  placeholder="Observaciones"
+                  value={form.observaciones}
+                  onChange={(e) =>
+                    setForm({ ...form, observaciones: e.target.value })
+                  }
+                  className={styles.textarea}
+                />
+              </td>
+            </tr>
+            <tr>
+              <td>Método de Pago</td>
+              <td>
+                <select
+                  value={form.metodoPago}
+                  onChange={(e) =>
+                    setForm({ ...form, metodoPago: e.target.value })
+                  }
+                  className={styles.input}
                 >
-                  + Agregar Salsa
-                </button>
-              </div>
+                  <option value="Efectivo">Efectivo</option>
+                  <option value="Nequi">Nequi</option>
+                  <option value="Daviplata">Daviplata</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Total</td>
+              <td>
+                <input
+                  type="number"
+                  placeholder="Ej: 56000"
+                  value={form.total}
+                  onChange={(e) => setForm({ ...form, total: e.target.value })}
+                  className={styles.input}
+                />
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-              <input
-                type="text"
-                placeholder="Bebida"
-                value={combo.bebida}
-                onChange={(e) =>
-                  handleComboChange(index, "bebida", e.target.value)
-                }
-                className={styles.input}
-              />
+        {/* === TABLA 2: Combos === */}
+        <h3>Combos</h3>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Alitas</th>
+              <th>Papas</th>
+              <th>Vegetales</th>
+              <th>Salsas</th>
+              <th>Bebida</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {form.combos.map((combo, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>
+                  <select
+                    value={combo.tipoAlitas}
+                    onChange={(e) =>
+                      handleComboChange(index, "tipoAlitas", e.target.value)
+                    }
+                    className={styles.inputSmall}
+                  >
+                    <option value="">Seleccionar</option>
+                    {menuConfigs.alitas.map((a, i) => (
+                      <option key={i} value={a}>
+                        {a}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td>
+                  <select
+                    value={combo.papas}
+                    onChange={(e) =>
+                      handleComboChange(index, "papas", e.target.value)
+                    }
+                    className={styles.inputSmall}
+                  >
+                    <option value="">Seleccionar</option>
+                    {menuConfigs.papas.map((p, i) => (
+                      <option key={i} value={p}>
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className={styles.center}>
+                  <input
+                    type="checkbox"
+                    checked={combo.vegetales}
+                    onChange={(e) =>
+                      handleComboChange(index, "vegetales", e.target.checked)
+                    }
+                  />
+                </td>
+                <td>
+                  {combo.salsas.map((salsa, iSalsa) => (
+                    <div key={iSalsa} className={styles.salsaItem}>
+                      <select
+                        value={salsa}
+                        onChange={(e) =>
+                          handleSalsaChange(index, e.target.value, iSalsa)
+                        }
+                        className={styles.inputSmall}
+                      >
+                        <option value="">Seleccionar</option>
+                        {menuConfigs.salsas.map((s, i) => (
+                          <option key={i} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => removeSalsa(index, iSalsa)}
+                        className={styles.btnSmall}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => addSalsa(index)}
+                    className={styles.btnAddSmall}
+                  >
+                    + Salsa
+                  </button>
+                </td>
+                <td>
+                  <select
+                    value={combo.bebida}
+                    onChange={(e) =>
+                      handleComboChange(index, "bebida", e.target.value)
+                    }
+                    className={styles.inputSmall}
+                  >
+                    <option value="">Seleccionar</option>
+                    {menuConfigs.bebidas.map((b, i) => (
+                      <option key={i} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </td>
+                <td className={styles.center}>
+                  <button
+                    onClick={() => removeCombo(index)}
+                    className={styles.btnDelete}
+                  >
+                    🗑
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-              <button
-                onClick={() => removeCombo(index)}
-                className={styles.btnDelete}
-              >
-                Eliminar Combo
-              </button>
-            </div>
-          ))}
-
+        <div className={styles.actions}>
           <button onClick={addCombo} className={styles.btnAddCombo}>
             + Agregar Combo
           </button>
-
           <button onClick={handleSubmit} className={styles.btnSubmit}>
             Registrar Pedido
           </button>
         </div>
       </div>
 
-      {/* === Lista de pedidos del día === */}
+      {/* === LISTA DE PEDIDOS === */}
       <div className={styles.listCard}>
         <h2>Pedidos del día</h2>
         {manualOrders.length === 0 ? (

@@ -568,6 +568,25 @@ app.post("/pedidos-manuales", async (req, res) => {
   }
 });
 
+// === Obtener pedidos del día (WhatsApp + Manuales) ===
+app.get("/pedidos-dia", async (req, res) => {
+  try {
+    const inicio = new Date();
+    inicio.setHours(0, 0, 0, 0); // Inicio del día
+    const fin = new Date();
+    fin.setHours(23, 59, 59, 999); // Fin del día
+
+    const pedidosHoy = await Pedido.find({
+      fecha: { $gte: inicio, $lte: fin },
+    }).sort({ fecha: -1 });
+
+    res.json(pedidosHoy);
+  } catch (err) {
+    console.error("Error obteniendo pedidos del día:", err);
+    res.status(500).json({ error: "No se pudieron obtener los pedidos del día." });
+  }
+});
+
 // === Ruta base ===
 app.get("/", (req, res) => res.send("Alitas bot ✅"));
 
