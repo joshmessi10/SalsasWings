@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"node server.js\""
   },
   "repository": {
     "type": "git",
@@ -24,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/joshmessi10/SalsasWings/issues"
   },
-  "homepage": "https://github.com/joshmessi10/SalsasWings#readme"
+  "homepage": "https://github.com/joshmessi10/SalsasWings#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
 }
