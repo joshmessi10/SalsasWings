@@ -114,14 +114,20 @@ app.post("/webhook", async (req, res) => {
 
     switch (session.step) {
 
-      case 1:
-        if (!/si|sí/i.test(text)) {
-          await sendMessage(from,"¿Cuántos combos deseas pedir? Ej: 1, 2, 3...");
-          delete sessions[from];
-          break;
-        }
-        session.step = 2;
-        break;
+     case 1:
+      // Siempre damos la bienvenida y pasamos directo a pedir combos
+      await sendMessage(
+        from,
+        "🍗 ¡Perfecto! Vamos a armar tu pedido 😋\n\n" +
+        "Cada combo incluye:\n" +
+        "• 10 alitas (Apanadas / Naturales / Mixtas)\n" +
+        "• Papas o Vegetales\n" +
+        "• 3 Salsas a elegir\n\n" +
+        "¿Cuántos combos deseas pedir? (Ejemplo: 1, 2, 3...)"
+      );
+      session.step = 2;
+      break;
+
 
       case 2:
         const cantidad = parseInt(text);
