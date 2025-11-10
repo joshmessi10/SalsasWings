@@ -516,6 +516,77 @@ app.put("/config", async (req, res) => {
   }
 });
 
+// === Endpoints para Pedidos Manuales ===
+
+// Obtener todos los pedidos manuales (o del día)
+app.get("/pedidos-manuales", async (req, res) => {
+  try {
+    // Puedes filtrar por fecha del día actual si quieres
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const pedidos = await Pedido.find({ fecha: { $gte: hoy } }).sort({ fecha: -1 });
+    res.json(pedidos);
+  } catch (e) {
+    console.error("Error obteniendo pedidos manuales:", e);
+    res.status(500).json({ error: "No se pudieron obtener los pedidos manuales." });
+  }
+});
+
+// Crear pedido manual (desde frontend)
+app.post("/pedidos-manuales", async (req, res) => {
+  try {
+    const {
+      numero,
+      combos,
+      direccion,
+      apartamento,
+      horaEntrega,
+      observaciones,
+      metodoPago,
+      total,
+    } = req.body;
+
+    if (!numero || !Array.isArray(combos) || combos.length === 0) {
+      return res.status(400).json({ error: "Faltan datos del pedido o combos inválidos." });
+    }
+
+    const nuevoPedido = await Pedido.create({
+      numero,
+      combos,
+      direccion,
+      apartamento,
+      horaEntrega,
+      observaciones,
+      metodoPago,
+      total,
+    });
+
+    res.status(201).json(nuevoPedido);
+  } catch (e) {
+    console.error("Error creando pedido manual:", e);
+    res.status(500).json({ error: "No se pudo crear el pedido manual." });
+  }
+});
+
+// === Obtener pedidos del día (WhatsApp + Manuales) ===
+app.get("/pedidos-dia", async (req, res) => {
+  try {
+    const inicio = new Date();
+    inicio.setHours(0, 0, 0, 0); // Inicio del día
+    const fin = new Date();
+    fin.setHours(23, 59, 59, 999); // Fin del día
+
+    const pedidosHoy = await Pedido.find({
+      fecha: { $gte: inicio, $lte: fin },
+    }).sort({ fecha: -1 });
+
+    res.json(pedidosHoy);
+  } catch (err) {
+    console.error("Error obteniendo pedidos del día:", err);
+    res.status(500).json({ error: "No se pudieron obtener los pedidos del día." });
+  }
+});
+
 // === Ruta base ===
 app.get("/", (req, res) => res.send("Alitas bot ✅"));
 
