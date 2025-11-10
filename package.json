@@ -1,0 +1,27 @@
+{
+  "name": "salsaswings",
+  "version": "1.0.0",
+  "description": "Salsas Wings Chatbot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshmessi10/SalsasWings.git"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.1",
+    "express": "^4.18.2"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshmessi10/SalsasWings/issues"
+  },
+  "homepage": "https://github.com/joshmessi10/SalsasWings#readme"
+}
