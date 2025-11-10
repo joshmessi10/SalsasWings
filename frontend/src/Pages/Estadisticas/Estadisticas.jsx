@@ -1,30 +1,67 @@
-import { useState } from 'react';
-import styles from './Estadisticas.module.css';
+import { useEffect, useState } from "react";
+import styles from "./Estadisticas.module.css";
 
 const Estadisticas = () => {
+  const [pedidos, setPedidos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Cargar pedidos del día desde el backend
+  useEffect(() => {
+    const fetchPedidos = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/pedidos-dia");
+        const data = await res.json();
+        setPedidos(data);
+      } catch (error) {
+        console.error("Error obteniendo pedidos del día:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPedidos();
+  }, []);
+
+  if (loading) return <div className={styles.loading}>Cargando estadísticas...</div>;
+
+  // === Cálculos básicos ===
+  const totalPedidos = pedidos.length;
+  const pedidosCompletados = totalPedidos; // todos se consideran completados
+  const pedidosPendientes = 0; // podrías extender con estado real si lo agregas
+  const ingresosTotales = pedidos.reduce((acc, p) => acc + (p.total || 0), 0);
+  const gastoEstimado = ingresosTotales * 0.35; // ejemplo estimado de costos
+  const gananciaNeta = ingresosTotales - gastoEstimado;
+
+  // === Agrupar ventas por día de la semana ===
+  const diasSemana = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+  const ventasPorDia = diasSemana.map((dia, i) => {
+    const pedidosDia = pedidos.filter((p) => new Date(p.fecha).getDay() === i);
+    const revenue = pedidosDia.reduce((acc, p) => acc + (p.total || 0), 0);
+    return { day: dia, orders: pedidosDia.length, revenue };
+  });
+
+  // === Top productos (por nombre de salsa o tipo de alitas) ===
+  const contadorProductos = {};
+  pedidos.forEach((p) => {
+    p.combos.forEach((c) => {
+      const key = c.tipoAlitas || "Desconocido";
+      contadorProductos[key] = (contadorProductos[key] || 0) + 1;
+    });
+  });
+
+  const topProducts = Object.entries(contadorProductos)
+    .map(([name, sales]) => ({
+      name,
+      sales,
+      revenue: sales * 25000, // estimación base
+    }))
+    .sort((a, b) => b.sales - a.sales)
+    .slice(0, 5);
+
   const stats = [
-    { label: 'Ingresos Hoy', value: '$ 1,250,000', icon: '💰', color: 'green' },
-    { label: 'Pedidos Completados', value: '45', icon: '✓', color: 'blue' },
-    { label: 'Pedidos Pendientes', value: '3', icon: '⏳', color: 'yellow' },
-    { label: 'Gasto Total', value: '$ 450,000', icon: '💸', color: 'red' },
-  ];
-
-  const dailyData = [
-    { day: 'Lunes', orders: 45, revenue: 1200000 },
-    { day: 'Martes', orders: 52, revenue: 1450000 },
-    { day: 'Miércoles', orders: 38, revenue: 950000 },
-    { day: 'Jueves', orders: 61, revenue: 1650000 },
-    { day: 'Viernes', orders: 58, revenue: 1550000 },
-    { day: 'Sábado', orders: 75, revenue: 1950000 },
-    { day: 'Domingo', orders: 42, revenue: 1100000 },
-  ];
-
-  const topProducts = [
-    { name: 'Alitas BBQ', sales: 156, revenue: 624000 },
-    { name: 'Alitas Picante', sales: 142, revenue: 568000 },
-    { name: 'Combo Especial', sales: 89, revenue: 445000 },
-    { name: 'Papas Criollas', sales: 120, revenue: 240000 },
-    { name: 'Alitas Thai', sales: 65, revenue: 260000 },
+    { label: "Ingresos Hoy", value: `$ ${ingresosTotales.toLocaleString("es-CO")}`, icon: "💰", color: "green" },
+    { label: "Pedidos Completados", value: pedidosCompletados.toString(), icon: "✓", color: "blue" },
+    { label: "Pedidos Pendientes", value: pedidosPendientes.toString(), icon: "⏳", color: "yellow" },
+    { label: "Gasto Total", value: `$ ${gastoEstimado.toLocaleString("es-CO")}`, icon: "💸", color: "red" },
   ];
 
   return (
@@ -34,6 +71,7 @@ const Estadisticas = () => {
         <p>Desempeño general del negocio</p>
       </div>
 
+      {/* === Resumen rápido === */}
       <div className={styles.statsGrid}>
         {stats.map((stat, index) => (
           <div key={index} className={`${styles.statBox} ${styles[stat.color]}`}>
@@ -46,16 +84,17 @@ const Estadisticas = () => {
         ))}
       </div>
 
+      {/* === Ventas por Día === */}
       <div className={styles.chartsGrid}>
         <div className={styles.card}>
           <h2>Ventas por Día</h2>
           <div className={styles.chart}>
-            {dailyData.map((data, index) => (
+            {ventasPorDia.map((data, index) => (
               <div key={index} className={styles.bar}>
                 <div
                   className={styles.barFill}
                   style={{
-                    height: `${(data.revenue / 2000000) * 100}%`,
+                    height: `${(data.revenue / Math.max(...ventasPorDia.map(v => v.revenue || 1))) * 100}%`,
                   }}
                 />
                 <span className={styles.barLabel}>{data.day.slice(0, 3)}</span>
@@ -67,6 +106,7 @@ const Estadisticas = () => {
           </div>
         </div>
 
+        {/* === Productos más vendidos === */}
         <div className={styles.card}>
           <h2>Productos Más Vendidos</h2>
           <div className={styles.productList}>
@@ -75,14 +115,14 @@ const Estadisticas = () => {
                 <div className={styles.productInfo}>
                   <span className={styles.productName}>{product.name}</span>
                   <span className={styles.productStats}>
-                    {product.sales} vendidas • $ {product.revenue}
+                    {product.sales} vendidas • ${product.revenue.toLocaleString("es-CO")}
                   </span>
                 </div>
                 <div className={styles.productBar}>
                   <div
                     className={styles.productBarFill}
                     style={{
-                      width: `${(product.sales / 156) * 100}%`,
+                      width: `${(product.sales / topProducts[0].sales) * 100}%`,
                     }}
                   />
                 </div>
@@ -92,40 +132,41 @@ const Estadisticas = () => {
         </div>
       </div>
 
+      {/* === Resumen mensual === */}
       <div className={styles.card}>
         <h2>Resumen Mensual</h2>
         <table className={styles.table}>
           <thead>
             <tr>
               <th>Métrica</th>
-              <th>Este Mes</th>
-              <th>Mes Anterior</th>
+              <th>Hoy</th>
+              <th>Estimación Mes</th>
               <th>Cambio</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td>Ingresos Totales</td>
-              <td>$ 28,500,000</td>
-              <td>$ 25,300,000</td>
+              <td>$ {ingresosTotales.toLocaleString("es-CO")}</td>
+              <td>$ {(ingresosTotales * 30).toLocaleString("es-CO")}</td>
               <td className={styles.positive}>+12.6%</td>
             </tr>
             <tr>
               <td>Número de Pedidos</td>
-              <td>1,250</td>
-              <td>1,180</td>
+              <td>{totalPedidos}</td>
+              <td>{totalPedidos * 30}</td>
               <td className={styles.positive}>+5.9%</td>
             </tr>
             <tr>
               <td>Gasto Total</td>
-              <td>$ 9,800,000</td>
-              <td>$ 10,200,000</td>
+              <td>$ {gastoEstimado.toLocaleString("es-CO")}</td>
+              <td>$ {(gastoEstimado * 30).toLocaleString("es-CO")}</td>
               <td className={styles.positive}>-4.0%</td>
             </tr>
             <tr>
               <td>Ganancia Neta</td>
-              <td>$ 18,700,000</td>
-              <td>$ 15,100,000</td>
+              <td>$ {gananciaNeta.toLocaleString("es-CO")}</td>
+              <td>$ {(gananciaNeta * 30).toLocaleString("es-CO")}</td>
               <td className={styles.positive}>+23.8%</td>
             </tr>
           </tbody>
