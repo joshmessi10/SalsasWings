@@ -15,157 +15,221 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // ✅ Conexión a MongoDB Atlas
 mongoose.connect(MONGO_URI)
-  .then(() => console.log("✅ Conectado a MongoDB Atlas"))
-  .catch(err => console.error("❌ Error conectando a MongoDB:", err));
+  .then(() => console.log("Conectado a MongoDB Atlas"))
+  .catch(err => console.error("Error conectando a MongoDB:", err));
 
-// ✅ Esquema y modelo de pedido
+// squemas
+const comboSchema = new mongoose.Schema({
+  tipoAlitas: String,
+  papas: String,
+  vegetales: Boolean,
+  salsas: [String],
+  bebida: String,
+});
+
 const pedidoSchema = new mongoose.Schema({
   numero: String,
-  cantidad: String,
-  tipo: String,
-  salsa: String,
-  bebida: String,
+  combos: [comboSchema],
   direccion: String,
+  apartamento: String,
+  horaEntrega: String,
+  observaciones: String,
+  metodoPago: String,
+  total: Number,
   fecha: { type: Date, default: Date.now }
 });
 const Pedido = mongoose.model("Pedido", pedidoSchema);
 
-// ✅ Sesiones en memoria
+// Sesiones en memoria
 const sessions = {};
 
-// Webhook de verificación
+// Función para enviar botones
+async function sendButtons(to, text, buttons) {
+  await axios.post(
+    `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
+    {
+      messaging_product: "whatsapp",
+      to,
+      type: "interactive",
+      interactive: {
+        type: "button",
+        body: { text },
+        action: {
+          buttons: buttons.map((label, index) => ({
+            type: "reply",
+            reply: { id: `btn_${index}`, title: label }
+          }))
+        }
+      }
+    },
+    { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+  );
+}
+
+// Función para enviar texto
+async function sendMessage(to, text) {
+  await axios.post(
+    `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
+    {
+      messaging_product: "whatsapp",
+      to,
+      text: { body: text }
+    },
+    { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
+  );
+}
+
+//  Webhook de verificación
 app.get("/webhook", (req, res) => {
   const mode = req.query["hub.mode"];
   const token = req.query["hub.verify_token"];
   const challenge = req.query["hub.challenge"];
 
   if (mode === "subscribe" && token === VERIFY_TOKEN) {
-    console.log("Webhook verificado");
     return res.status(200).send(challenge);
   }
   return res.sendStatus(403);
 });
 
-// ✅ Webhook de mensajes entrantes
+//  Webhook de mensajes
 app.post("/webhook", async (req, res) => {
   try {
-    const entry = req.body.entry?.[0];
-    const changes = entry?.changes?.[0];
-    const message = changes?.value?.messages?.[0];
-
+    const message = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
     if (!message) return res.sendStatus(200);
 
     const from = message.from;
-    const text = (message.text?.body || "").trim();
-    if (!sessions[from]) sessions[from] = { step: 1 };
+    const text = (message.text?.body || message.button?.text || "").trim();
+
+    if (!sessions[from]) {
+      sessions[from] = { step: 1 };
+      await sendButtons(
+        from,
+        "🍗 ¡Bienvenido a *Salsas Wings*! Horario: *Viernes y Sábado de 5pm a 10pm*.\n\n¿Deseas hacer un pedido?",
+        ["Sí", "No"]
+      );
+      return res.sendStatus(200);
+    }
 
     const session = sessions[from];
-    let reply = "";
 
-    // === FLUJO CON VALIDACIONES ===
     switch (session.step) {
+
       case 1:
-        reply = "🍗 ¡Hola! Bienvenido a *Alitas Express*.\n¿Cuántas alitas quieres?";
+        if (!/si|sí/i.test(text)) {
+          await sendMessage(from,"¿Cuántos combos deseas pedir? Ej: 1, 2, 3...");
+          delete sessions[from];
+          break;
+        }
         session.step = 2;
         break;
 
       case 2:
-        if (!/^\d+$/.test(text)) {
-          reply = "Por favor, escribe solo un número (ejemplo: 12)";
+        const cantidad = parseInt(text);
+        if (!cantidad || cantidad <= 0) {
+          await sendMessage(from, "Escribe un número válido.");
           break;
         }
-        session.cantidad = text;
+        session.total_combos = cantidad;
+        session.combo_index = 1;
+        session.combos = [];
+        await sendButtons(from, `Combo ${session.combo_index}: ¿Cómo deseas las alitas?`, ["Apanadas", "Naturales", "Mixtas"]);
         session.step = 3;
-        reply = "¿Las deseas *apanadas* o *fritas*?";
         break;
 
       case 3:
-        if (!["apanadas", "fritas"].includes(text.toLowerCase())) {
-          reply = "Opción no válida. Escribe *apanadas* o *fritas* 🍗";
-          break;
-        }
-        session.tipo = text;
+        session.current_combo = { tipoAlitas: text };
+        await sendButtons(from, "¿Qué acompañamiento deseas?", ["Papas Francesas", "Papas Criollas", "Sin papas"]);
         session.step = 4;
-        reply = "Perfecto 😋 ¿Qué salsa prefieres? (BBQ / Picante / Mango / Miel)";
         break;
 
       case 4:
-        if (!["bbq", "picante", "mango", "miel"].includes(text.toLowerCase())) {
-          reply = "Por favor elige una salsa válida: *BBQ*, *Picante*, *Mango* o *Miel* 🌶️";
-          break;
-        }
-        session.salsa = text;
+        session.current_combo.papas = text;
+        await sendButtons(from, "¿Deseas vegetales?", ["Sí", "No"]);
         session.step = 5;
-        reply = "¿Qué bebida deseas? (Coca-Cola o Corona) 🥤🍺";
         break;
 
       case 5:
-        if (!["coca-cola", "cocacola", "corona"].includes(text.toLowerCase())) {
-          reply = "Solo tenemos *Coca-Cola* o *Corona*. Escribe una de ellas 😄";
-          break;
-        }
-        session.bebida = text;
+        session.current_combo.vegetales = /sí|si/i.test(text);
+        session.current_combo.salsas = [];
+        await sendMessage(from, "Elige 3 salsas (una por mensaje):\nBúfalo, BBQ Piña, BBQ Café, Pimentón Ahumado, Ajo, Miel Mostaza, Tártara, Mora Silvestre, Mango Habanero");
         session.step = 6;
-        reply = "Por favor envía tu dirección completa para la entrega 📍";
         break;
 
       case 6:
-        if (text.length < 5) {
-          reply = "Tu dirección parece incompleta. Por favor envíala completa 🏠";
+        session.current_combo.salsas.push(text);
+        if (session.current_combo.salsas.length < 3) {
+          await sendMessage(from, `Perfecto, ahora la siguiente salsa (${session.current_combo.salsas.length + 1}/3):`);
+        } else {
+          await sendButtons(from, "¿Deseas bebida?", ["Coca-Cola", "Corona", "Sin bebida"]);
+          session.step = 7;
+        }
+        break;
+
+      case 7:
+        session.current_combo.bebida = text;
+        session.combos.push(session.current_combo);
+
+        if (session.combo_index < session.total_combos) {
+          session.combo_index++;
+          await sendButtons(from, `Combo ${session.combo_index}: ¿Cómo deseas las alitas?`, ["Apanadas", "Naturales", "Mixtas"]);
+          session.step = 3;
           break;
         }
+
+        await sendMessage(from, "📍 Envíame la *dirección*:");
+        session.step = 8;
+        break;
+
+      case 8:
         session.direccion = text;
-
-        // ✅ Guardar en MongoDB
-        await Pedido.create({
-          numero: from,
-          cantidad: session.cantidad,
-          tipo: session.tipo,
-          salsa: session.salsa,
-          bebida: session.bebida,
-          direccion: session.direccion
-        });
-
-        reply = `✅ Pedido recibido:
-- ${session.cantidad} alitas
-- ${session.tipo}
-- Salsa: ${session.salsa}
-- Bebida: ${session.bebida}
-- Dirección: ${session.direccion}
-
-¡Gracias! En breve confirmamos tu pedido 🍗`;
-
-        delete sessions[from];
+        await sendMessage(from, "Número de apartamento o casa:");
+        session.step = 9;
         break;
 
-      default:
-        reply = "Envía *hola* para iniciar un nuevo pedido 🍗";
+      case 9:
+        session.apartamento = text;
+        await sendButtons(from, "Hora de entrega:", ["Ya mismo", "8pm", "9pm"]);
+        session.step = 10;
+        break;
+
+      case 10:
+        session.horaEntrega = text;
+        await sendMessage(from, "Observaciones (opcional):");
+        session.step = 11;
+        break;
+
+      case 11:
+        session.observaciones = text;
+        await sendButtons(from, "Método de pago:", ["Efectivo", "Nequi", "Daviplata"]);
+        session.step = 12;
+        break;
+
+      case 12:
+        session.metodoPago = text;
+        session.total = session.combos.reduce((acc, c) => acc + (c.bebida === "Sin bebida" ? 25000 : 28000), 0);
+
+        await Pedido.create(session);
+
+        await sendMessage(from,
+`✅ *Pedido Confirmado*
+
+Total: *$${session.total}*
+Entrega: ${session.horaEntrega}
+Pago: ${session.metodoPago}
+
+Gracias 🧡 Tus alitas van en camino 🍗🔥`);
+
         delete sessions[from];
         break;
     }
 
-    // ✅ Enviar respuesta al usuario
-    if (reply) {
-      await axios.post(
-        `https://graph.facebook.com/v21.0/${PHONE_NUMBER_ID}/messages`,
-        {
-          messaging_product: "whatsapp",
-          to: from,
-          text: { body: reply }
-        },
-        { headers: { Authorization: `Bearer ${ACCESS_TOKEN}` } }
-      );
-    }
+    res.sendStatus(200);
 
-    return res.sendStatus(200);
   } catch (err) {
-    console.error("Webhook error:", err?.response?.data || err.message);
-    return res.sendStatus(500);
+    console.error(err?.response?.data || err);
+    res.sendStatus(500);
   }
 });
 
-// Ruta base
-app.get("/", (req, res) => res.send("Alitas bot running ✅"));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Server listening on ${PORT}`));
+app.get("/", (req, res) => res.send("Alitas bot ✅"));
+app.listen(3000, () => console.log("🚀 Server listo en puerto 3000"));
