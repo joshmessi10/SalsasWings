@@ -32,7 +32,7 @@ const PedidosManuales = () => {
 
   // === Cargar pedidos manuales ===
   useEffect(() => {
-    get("/pedidos-manuales")
+    fetch("http://localhost:3000/pedidos-dia")
       .then((res) => res.json())
       .then(setManualOrders)
       .catch((err) => console.error("Error cargando pedidos:", err));
