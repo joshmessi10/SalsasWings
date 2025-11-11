@@ -1,0 +1,194 @@
+@import '../../styles/variables.css';
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.header h1 {
+  font-size: var(--font-2xl);
+  color: var(--gray-900);
+  margin: 0;
+}
+
+.header p {
+  color: var(--gray-500);
+  font-size: var(--font-sm);
+  margin: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+.section {
+  background-color: var(--white);
+  padding: var(--spacing-xl);
+  border-radius: var(--rounded-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.section h2 {
+  font-size: var(--font-lg);
+  margin: 0;
+  color: var(--gray-900);
+  border-bottom: 2px solid var(--primary-red);
+  padding-bottom: var(--spacing-md);
+}
+
+.addExpenseForm {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.input {
+  padding: var(--spacing-md);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--rounded-md);
+  font-size: var(--font-sm);
+  transition: border-color var(--transition-base);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+}
+
+.btnAdd {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--primary-red);
+  color: var(--white);
+  border-radius: var(--rounded-md);
+  font-weight: 600;
+  font-size: var(--font-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-base);
+}
+
+.btnAdd:hover {
+  background-color: var(--dark-red);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-sm);
+  margin-bottom: var(--spacing-lg);
+}
+
+.table thead {
+  background-color: var(--gray-100);
+  border-bottom: 2px solid var(--primary-red);
+}
+
+.table th {
+  padding: var(--spacing-md);
+  text-align: left;
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.table tbody tr:hover {
+  background-color: var(--gray-50);
+}
+
+.table td {
+  padding: var(--spacing-md);
+  color: var(--gray-700);
+}
+
+.total {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--light-red);
+  color: var(--dark-red);
+  border-radius: var(--rounded-md);
+  font-weight: 600;
+  text-align: right;
+}
+
+.inventoryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.inventoryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--gray-50);
+  border-radius: var(--rounded-md);
+  border-left: 4px solid var(--gray-300);
+  transition: all var(--transition-base);
+}
+
+.inventoryItem.bien {
+  border-left-color: #10b981;
+}
+
+.inventoryItem.bajo {
+  border-left-color: #f59e0b;
+  background-color: #fffbeb;
+}
+
+.inventoryItem.critico {
+  border-left-color: var(--primary-red);
+  background-color: var(--light-red);
+}
+
+.itemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.itemName {
+  font-weight: 600;
+  color: var(--gray-900);
+  font-size: var(--font-sm);
+}
+
+.itemQuantity {
+  color: var(--gray-600);
+  font-size: var(--font-xs);
+}
+
+.statusBadge {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--white);
+  color: var(--gray-700);
+  border-radius: var(--rounded-md);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .addExpenseForm {
+    grid-template-columns: 1fr;
+  }
+}
