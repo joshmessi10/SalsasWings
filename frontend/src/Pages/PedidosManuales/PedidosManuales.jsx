@@ -1,3 +1,4 @@
+import { get, post, put, API } from "../../lib/api";
 import { useState, useEffect } from "react";
 import styles from "./PedidosManuales.module.css";
 
@@ -39,7 +40,7 @@ const PedidosManuales = () => {
 
   // === Cargar configuración del menú ===
   useEffect(() => {
-    fetch("http://localhost:3000/config")
+    get("/config")
       .then((res) => res.json())
       .then((data) => {
         // Estructura esperada: { alitas: [...], papas: [...], salsas: [...], bebidas: [...] }
@@ -102,7 +103,7 @@ const PedidosManuales = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:3000/pedidos-manuales", {
+      const res = await get("/pedidos-manuales", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

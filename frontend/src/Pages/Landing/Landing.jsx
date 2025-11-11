@@ -1,3 +1,4 @@
+import { get, post, put, API } from "../../lib/api";
 import { useState, useEffect } from "react";
 import styles from "./Landing.module.css";
 
@@ -8,7 +9,7 @@ const Landing = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await fetch("http://localhost:3000/pedidos-dia");
+        const res = await get("/pedidos-dia");
         const data = await res.json();
         // Ordenar por horaEntrega ascendente (convertida a Date si posible)
         const sorted = data.sort((a, b) => {
