@@ -1,11 +1,6 @@
 {
   "name": "salsaswings",
   "version": "1.0.0",
-   "private": true,           
-    "workspaces": [
-    ".",                   
-    "frontend"              
-  ],
   "description": "Salsas Wings Chatbot",
   "main": "index.js",
   "scripts": {
