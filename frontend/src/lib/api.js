@@ -1,43 +1,49 @@
-// frontend/src/lib/api.js
-const fromEnv = (import.meta?.env?.VITE_API_URL || '').trim();
+const RAW = import.meta?.env?.VITE_API_URL ?? '';
+export const API = (RAW || '').replace(/\/+$/, ''); // sin slash al final
 
-// En dev: si no hay VITE_API_URL, usar http://localhost:3000.
-// En prod (Render): same-origin (cadena vacía).
-export const API =
-  fromEnv || (import.meta.env.DEV ? 'http://localhost:3000' : '');
+const join = (u) => `${API}${u.startsWith('/') ? u : `/${u}`}`;
 
-// Pequeña utilidad para GET que valida JSON
-export async function get(url, opts) {
-  const res = await fetch(`${API}${url}`, { credentials: 'omit', ...opts });
-  const ct = res.headers.get('content-type') || '';
-
+export const get = async (url, opts) => {
+  const full = join(url);
+  console.log('[API][GET]', full);
+  const res = await fetch(full, { credentials: 'omit', ...(opts || {}) });
   if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    throw new Error(`HTTP ${res.status} ${res.statusText} @ ${API}${url}\n${txt.slice(0, 300)}`);
+    const text = await res.text().catch(() => '');
+    throw new Error(`GET ${full} -> ${res.status} ${res.statusText} ${text}`);
   }
-  if (!ct.includes('application/json')) {
-    const txt = await res.text().catch(() => '');
-    throw new Error(`Esperaba JSON pero recibí "${ct}" desde ${API}${url}\n${txt.slice(0, 300)}`);
-  }
-  return res.json();
-}
+  return res;
+};
 
-export async function post(url, body, opts = {}) {
-  const res = await fetch(`${API}${url}`, {
+export const post = async (url, body, opts = {}) => {
+  const full = join(url);
+  console.log('[API][POST]', full, body);
+  const res = await fetch(full, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
     body: JSON.stringify(body),
+    credentials: 'omit',
     ...opts,
   });
-  return res.json();
-}
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`POST ${full} -> ${res.status} ${res.statusText} ${text}`);
+  }
+  return res;
+};
 
-export async function put(url, body, opts = {}) {
-  const res = await fetch(`${API}${url}`, {
+export const put = async (url, body, opts = {}) => {
+  const full = join(url);
+  console.log('[API][PUT]', full, body);
+  const res = await fetch(full, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...(opts.headers || {}) },
     body: JSON.stringify(body),
+    credentials: 'omit',
     ...opts,
   });
-  return res.json();
-}
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`PUT ${full} -> ${res.status} ${res.statusText} ${text}`);
+  }
+  return res;
+};
