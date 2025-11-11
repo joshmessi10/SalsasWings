@@ -1,12 +1,19 @@
 {
   "name": "salsaswings",
   "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    ".",
+    "frontend"
+  ],
   "description": "Salsas Wings Chatbot",
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npm run dev --prefix frontend\" \"node server.js\""
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"node server.js\"",
+    "build": "npm --prefix frontend run build",
+    "install:frontend": "npm --prefix frontend install"
   },
   "repository": {
     "type": "git",
@@ -29,5 +36,6 @@
   "homepage": "https://github.com/joshmessi10/SalsasWings#readme",
   "devDependencies": {
     "concurrently": "^9.2.1"
-  }
+  },
+  "type": "module"
 }

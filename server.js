@@ -11,6 +11,16 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cors());
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// === Static (Vite build) ===
+// Serve frontend build (same-origin). Run: npm --prefix frontend run build
+app.use(express.static(path.join(__dirname, "frontend", "dist")));
+
 // === ENV ===
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
@@ -616,5 +626,11 @@ app.put("/gastos", async (req, res) => {
 app.get("/", (req, res) => res.send("Alitas bot ✅"));
 
 // === Servidor ===
+// === SPA fallback (put this AFTER your API routes) ===
+app.get("*", (req, res) => {
+  // avoid hijacking webhook verification/other explicit routes with query params if any
+  res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server listo en puerto ${PORT}`));

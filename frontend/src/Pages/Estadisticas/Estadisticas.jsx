@@ -1,3 +1,4 @@
+import { get, post, put, API } from "../../lib/api";
 import { useEffect, useState } from "react";
 import styles from "./Estadisticas.module.css";
 
@@ -9,7 +10,7 @@ const Estadisticas = () => {
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
-        const res = await fetch("http://localhost:3000/pedidos-dia");
+        const res = await get("/pedidos-dia");
         const data = await res.json();
         setPedidos(data);
       } catch (error) {

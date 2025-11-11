@@ -1,3 +1,4 @@
+import { get, post, put, API } from "../../lib/api";
 import { useEffect, useState } from "react";
 import styles from "./Gestion.module.css";
 
@@ -19,7 +20,7 @@ const Gestion = () => {
 
   // Cargar pedidos y gastos
   useEffect(() => {
-    fetch("http://localhost:3000/pedidos-dia")
+    get("/pedidos-dia")
       .then((res) => res.json())
       .then((data) => {
         setPedidos(data);
@@ -27,7 +28,7 @@ const Gestion = () => {
       })
       .catch((err) => console.error("Error obteniendo pedidos:", err));
 
-    fetch("http://localhost:3000/gastos")
+    get("/gastos")
       .then((res) => res.json())
       .then((data) => setExpenses(data))
       .catch((err) => console.error("Error obteniendo gastos:", err));
@@ -74,7 +75,7 @@ const Gestion = () => {
   const handleAddExpense = async () => {
     if (newExpense.description && newExpense.amount) {
       try {
-        const res = await fetch("http://localhost:3000/gastos", {
+        const res = await get("/gastos", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
