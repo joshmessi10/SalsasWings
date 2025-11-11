@@ -296,7 +296,7 @@ app.post("/webhook", async (req, res) => {
         }
         session.current_combo.papas = input.text;
 
-        await sendButtons(from, "¿Deseas vegetales?", ["Sí", "No"]);
+        await sendButtons(from, "¿Deseas vegetales (apio y zanahoria)?", ["Sí", "No"]);
         session.step = 5;
         break;
       }
@@ -304,7 +304,7 @@ app.post("/webhook", async (req, res) => {
       case 5: {
         // Vegetales
         if (!/^(sí|si|no)$/i.test(input.text)) {
-          await sendButtons(from, "¿Deseas vegetales?", ["Sí", "No"]);
+          await sendButtons(from, "¿Deseas vegetales (apio y zanahoria)?", ["Sí", "No"]);
           break;
         }
         session.current_combo.vegetales = /^sí|si$/i.test(input.text);
@@ -518,20 +518,6 @@ app.put("/config", async (req, res) => {
 
 // === Endpoints para Pedidos Manuales ===
 
-// Obtener todos los pedidos manuales (o del día)
-app.get("/pedidos-manuales", async (req, res) => {
-  try {
-    // Puedes filtrar por fecha del día actual si quieres
-    const hoy = new Date();
-    hoy.setHours(0, 0, 0, 0);
-    const pedidos = await Pedido.find({ fecha: { $gte: hoy } }).sort({ fecha: -1 });
-    res.json(pedidos);
-  } catch (e) {
-    console.error("Error obteniendo pedidos manuales:", e);
-    res.status(500).json({ error: "No se pudieron obtener los pedidos manuales." });
-  }
-});
-
 // Crear pedido manual (desde frontend)
 app.post("/pedidos-manuales", async (req, res) => {
   try {
@@ -584,6 +570,45 @@ app.get("/pedidos-dia", async (req, res) => {
   } catch (err) {
     console.error("Error obteniendo pedidos del día:", err);
     res.status(500).json({ error: "No se pudieron obtener los pedidos del día." });
+  }
+});
+
+// === Schema y Endpoints para GASTOS ===
+
+// --- Schema ---
+const gastoSchema = new mongoose.Schema({
+  description: { type: String, required: true },
+  amount: { type: Number, required: true },
+  date: { type: String, required: true },
+});
+
+const Gasto = mongoose.model("Gasto", gastoSchema);
+
+// --- Obtener todos los gastos ---
+app.get("/gastos", async (req, res) => {
+  try {
+    const gastos = await Gasto.find().sort({ date: -1 });
+    res.json(gastos);
+  } catch (e) {
+    console.error("Error obteniendo gastos:", e);
+    res.status(500).json({ error: "No se pudieron obtener los gastos." });
+  }
+});
+
+// --- Agregar nuevo gasto ---
+app.put("/gastos", async (req, res) => {
+  try {
+    const { description, amount } = req.body;
+    if (!description || !amount)
+      return res.status(400).json({ error: "Faltan campos obligatorios." });
+
+    const date = new Date().toISOString().split("T")[0];
+    const nuevoGasto = await Gasto.create({ description, amount, date });
+
+    res.status(201).json(nuevoGasto);
+  } catch (e) {
+    console.error("Error creando gasto:", e);
+    res.status(500).json({ error: "No se pudo crear el gasto." });
   }
 });
 
