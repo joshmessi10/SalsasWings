@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { FiPlus, FiTrash2, FiSave, FiX, FiChevronRight } from "react-icons/fi";
 import styles from "./PedidosManuales.module.css";
 
 const PedidosManuales = () => {
@@ -42,7 +43,6 @@ const PedidosManuales = () => {
     fetch("http://localhost:3000/config")
       .then((res) => res.json())
       .then((data) => {
-        // Estructura esperada: { alitas: [...], papas: [...], salsas: [...], bebidas: [...] }
         setMenuConfigs({
           alitas: data?.alitas || [],
           papas: data?.papas || [],
@@ -147,7 +147,7 @@ const PedidosManuales = () => {
       <div className={styles.formCard}>
         <h2>Registrar Nuevo Pedido</h2>
 
-        {/* === TABLA 1: Datos generales === */}
+        {/* === TABLA 1: Datos generales (limpia y compacta) === */}
         <table className={styles.table}>
           <thead>
             <tr>
@@ -254,23 +254,29 @@ const PedidosManuales = () => {
         </table>
 
         {/* === TABLA 2: Combos === */}
-        <h3>Combos</h3>
+        <div className={styles.combosHeader}>
+          <h3>Combos</h3>
+          <button onClick={addCombo} className={styles.btnAddCombo} type="button">
+            <FiPlus size={16} /> <span>Agregar Combo</span>
+          </button>
+        </div>
+
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>#</th>
+              <th className={styles.colIndex}>#</th>
               <th>Alitas</th>
               <th>Papas</th>
               <th>Vegetales</th>
               <th>Salsas</th>
               <th>Bebida</th>
-              <th>Acción</th>
+              <th className={styles.colAction}>Acción</th>
             </tr>
           </thead>
           <tbody>
             {form.combos.map((combo, index) => (
               <tr key={index}>
-                <td>{index + 1}</td>
+                <td className={styles.center}>{index + 1}</td>
                 <td>
                   <select
                     value={combo.tipoAlitas}
@@ -332,16 +338,21 @@ const PedidosManuales = () => {
                       <button
                         onClick={() => removeSalsa(index, iSalsa)}
                         className={styles.btnSmall}
+                        type="button"
+                        title="Quitar salsa"
+                        aria-label="Quitar salsa"
                       >
-                        ✕
+                        <FiX size={14} />
                       </button>
                     </div>
                   ))}
                   <button
                     onClick={() => addSalsa(index)}
                     className={styles.btnAddSmall}
+                    type="button"
+                    title="Agregar salsa"
                   >
-                    + Salsa
+                    <FiPlus size={14} /> <span>Salsa</span>
                   </button>
                 </td>
                 <td>
@@ -364,8 +375,11 @@ const PedidosManuales = () => {
                   <button
                     onClick={() => removeCombo(index)}
                     className={styles.btnDelete}
+                    type="button"
+                    title="Eliminar combo"
+                    aria-label="Eliminar combo"
                   >
-                    🗑
+                    <FiTrash2 size={16} />
                   </button>
                 </td>
               </tr>
@@ -374,11 +388,9 @@ const PedidosManuales = () => {
         </table>
 
         <div className={styles.actions}>
-          <button onClick={addCombo} className={styles.btnAddCombo}>
-            + Agregar Combo
-          </button>
-          <button onClick={handleSubmit} className={styles.btnSubmit}>
-            Registrar Pedido
+          <button onClick={handleSubmit} className={styles.btnSubmit} type="button">
+            <FiSave size={16} />
+            <span>Registrar Pedido</span>
           </button>
         </div>
       </div>
@@ -389,28 +401,37 @@ const PedidosManuales = () => {
         {manualOrders.length === 0 ? (
           <p className={styles.empty}>No hay pedidos aún</p>
         ) : (
-          manualOrders.map((p) => (
-            <div key={p._id} className={styles.orderItem}>
-              <div className={styles.orderHeader}>
-                <span>{p.numero}</span>
-                <span>{new Date(p.fecha).toLocaleString()}</span>
+          <div className={styles.ordersList}>
+            {manualOrders.map((p) => (
+              <div key={p._id} className={styles.orderItem}>
+                <div className={styles.orderHeader}>
+                  <span className={styles.customer}>{p.numero}</span>
+                  <span className={styles.date}>
+                    {new Date(p.fecha).toLocaleString()}
+                  </span>
+                </div>
+
+                <div className={styles.orderBody}>
+                  <p className={styles.items}><strong>Dirección:</strong> {p.direccion}</p>
+                  <p className={styles.items}>
+                    <strong>Pago:</strong> {p.metodoPago} —{" "}
+                    <strong>Total:</strong> ${p.total.toLocaleString("es-CO")}
+                  </p>
+                  <ul className={styles.comboList}>
+                    {p.combos.map((c, i) => (
+                      <li key={i}>
+                        <FiChevronRight />
+                        <span>
+                          <b>{c.tipoAlitas}</b> con {c.papas},{" "}
+                          {c.vegetales ? "con vegetales" : "sin vegetales"} — <i>{c.bebida}</i>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <p>{p.direccion}</p>
-              <p>
-                <b>Pago:</b> {p.metodoPago} —{" "}
-                <b>Total:</b> ${p.total.toLocaleString("es-CO")}
-              </p>
-              <ul>
-                {p.combos.map((c, i) => (
-                  <li key={i}>
-                    🍗 <b>{c.tipoAlitas}</b> con {c.papas},{" "}
-                    {c.vegetales ? "con vegetales" : "sin vegetales"} —{" "}
-                    <i>{c.bebida}</i>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

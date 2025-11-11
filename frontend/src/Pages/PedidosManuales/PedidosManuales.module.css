@@ -1,15 +1,21 @@
 @import '../../styles/variables.css';
 
+/* ===== Layout base ===== */
 .container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
+  padding: var(--spacing-2xl);
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .header {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
+  align-items: center;            /* centra con contenedores */
+  text-align: center;
 }
 
 .header h1 {
@@ -24,74 +30,204 @@
   margin: 0;
 }
 
+/* ===== Card del formulario ===== */
 .formCard {
   background-color: var(--white);
   padding: var(--spacing-xl);
   border-radius: var(--rounded-lg);
   box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
 }
 
 .formCard h2 {
   font-size: var(--font-lg);
-  margin: 0 0 var(--spacing-lg) 0;
+  margin: 0;
   color: var(--gray-900);
   border-bottom: 2px solid var(--primary-red);
   padding-bottom: var(--spacing-md);
 }
 
-.form {
-  display: grid;
-  grid-template-columns: 2fr 2fr 1fr;
-  gap: var(--spacing-lg);
-  align-items: flex-end;
+/* ===== Tabla minimal (datos y combos) ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--rounded-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
+.table thead {
+  background: var(--gray-100);
 }
 
-.formGroup label {
+.table th,
+.table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--gray-200);
   font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--gray-700);
+  vertical-align: middle;
+  color: var(--gray-900);
 }
 
+.table tbody tr:hover {
+  background: var(--gray-50);
+}
+
+.colIndex { width: 56px; text-align: center; }
+.colAction { width: 96px; text-align: center; }
+.center { text-align: center; }
+
+/* ===== Inputs / Selects / Textarea ===== */
 .input,
+.inputSmall,
 .textarea {
   padding: var(--spacing-md);
   border: 1px solid var(--gray-300);
   border-radius: var(--rounded-md);
   font-size: var(--font-sm);
   font-family: inherit;
-  transition: border-color var(--transition-base);
   background-color: var(--white);
   color: var(--gray-900);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  width: 100%;
+}
+
+.inputSmall {
+  padding: 8px 10px;
+  font-size: var(--font-xs, 12px);
+  border-radius: var(--rounded-sm);
+}
+
+.textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
 .input:focus,
+.inputSmall:focus,
 .textarea:focus {
   outline: none;
   border-color: var(--primary-red);
   box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
 }
 
+/* ===== Zona Combos (header + acción) ===== */
+.combosHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-top: -4px;
+}
+
+.combosHeader h3{
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-md);
+  color: var(--gray-900);
+}
+
+/* ===== Botones ===== */
+.btnSubmit,
+.btnDelete,
+.btnAddCombo,
+.btnSmall,
+.btnAddSmall {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-weight: 600;
+}
+
+/* Registrar Pedido (primario) */
 .btnSubmit {
-  padding: var(--spacing-md) var(--spacing-lg);
+  padding: 10px 14px;
   background-color: var(--primary-red);
   color: var(--white);
   border-radius: var(--rounded-md);
-  font-weight: 600;
+  border: none;
   font-size: var(--font-sm);
-  cursor: pointer;
-  transition: background-color var(--transition-base);
 }
 
-.btnSubmit:hover {
-  background-color: var(--dark-red);
+.btnSubmit:hover { background-color: var(--dark-red); }
+
+/* Eliminar combo (icon-only) */
+.btnDelete {
+  background-color: transparent;
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+  border-radius: var(--rounded-sm);
+  width: 32px;
+  height: 32px;
+  justify-content: center;
 }
 
+.btnDelete:hover {
+  background-color: var(--primary-red);
+  color: var(--white);
+}
+
+/* Agregar combo */
+.btnAddCombo {
+  padding: 8px 12px;
+  background-color: var(--white);
+  color: var(--primary-red);
+  border-radius: var(--rounded-md);
+  border: 1px solid var(--primary-red);
+  font-size: var(--font-sm);
+}
+
+.btnAddCombo:hover { background-color: var(--light-red); }
+
+/* Quitar salsa (pequeño) */
+.btnSmall {
+  background: transparent;
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+  border-radius: var(--rounded-sm);
+  width: 28px;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  font-size: var(--font-xs, 12px);
+}
+
+.btnSmall:hover { background: var(--primary-red); color: var(--white); }
+
+/* Agregar salsa (pequeño) */
+.btnAddSmall {
+  margin-top: var(--spacing-xs);
+  padding: 6px 10px;
+  background-color: var(--white);
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+  border-radius: var(--rounded-sm);
+  font-size: var(--font-xs, 12px);
+}
+
+.btnAddSmall:hover { background: var(--light-red); }
+
+/* Item salsa en celda */
+.salsaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+/* ===== Acciones inferiores ===== */
+.actions {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: flex-end;
+}
+
+/* ===== Lista de pedidos (cards) ===== */
 .listCard {
   background-color: var(--white);
   padding: var(--spacing-xl);
@@ -109,18 +245,18 @@
 
 .ordersList {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: var(--spacing-lg);
 }
 
 .empty {
-  grid-column: 1 / -1;
   text-align: center;
   color: var(--gray-500);
   padding: var(--spacing-xl);
   font-size: var(--font-sm);
 }
 
+/* Card de pedido */
 .orderItem {
   border: 1px solid var(--gray-200);
   border-radius: var(--rounded-lg);
@@ -143,69 +279,41 @@
   border-bottom: 1px solid var(--gray-200);
 }
 
-.customer {
-  font-weight: 600;
-  color: var(--gray-900);
-  font-size: var(--font-sm);
-}
-
-.date {
-  color: var(--gray-500);
-  font-size: var(--font-xs);
-}
+.customer { font-weight: 600; color: var(--gray-900); font-size: var(--font-sm); }
+.date     { color: var(--gray-500); font-size: var(--font-xs); }
 
 .orderBody {
   padding: var(--spacing-lg);
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-sm);
 }
 
-.items {
-  color: var(--gray-700);
-  font-size: var(--font-sm);
-  line-height: 1.4;
+.items { color: var(--gray-700); font-size: var(--font-sm); margin: 0; }
+
+/* combos en lista con icono */
+.comboList {
+  list-style: none;
+  padding: 0;
   margin: 0;
-}
-
-.orderFooter {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: var(--spacing-md);
-  border-top: 1px solid var(--gray-200);
+  flex-direction: column;
+  gap: 6px;
 }
 
-.total {
-  font-weight: 700;
-  color: var(--primary-red);
-  font-size: var(--font-lg);
+.comboList li {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: start;
+  gap: 8px;
+  color: var(--gray-800);
+  font-size: var(--font-sm);
 }
 
-.btnDelete {
-  padding: var(--spacing-xs) var(--spacing-md);
-  background-color: var(--light-red);
-  color: var(--dark-red);
-  border-radius: var(--rounded-md);
-  font-size: var(--font-xs);
-  font-weight: 600;
-  cursor: pointer;
-  transition: all var(--transition-base);
-  border: 1px solid var(--primary-red);
-}
-
-.btnDelete:hover {
-  background-color: var(--primary-red);
-  color: var(--white);
-}
-
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .form {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
-
-  .ordersList {
-    grid-template-columns: 1fr;
-  }
+  .container { padding: var(--spacing-lg); gap: var(--spacing-xl); }
+  .ordersList { grid-template-columns: 1fr; }
+  .colIndex { width: 44px; }
+  .colAction { width: 80px; }
 }

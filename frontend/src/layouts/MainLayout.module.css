@@ -1,86 +1,147 @@
-@import '../styles/variables.css';
+/* =======================
+   MainLayout.module.css
+   ======================= */
 
-.layout {
-  display: flex;
-  height: 100vh;
-  background-color: var(--white);
+:root {
+  /* paleta gris + blanco */
+  --white: #ffffff;
+  --gray-50: #f9fafb;
+  --gray-200: #e5e7eb;
+  --gray-400: #9ca3af;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+
+  --font-sm: 0.9rem;
+  --font-lg: 1.1rem;
+  --font-xl: 1.4rem;
+  --font-2xl: 1.8rem;
+
+  --rounded-lg: 12px;
+
+  --spacing-sm: 10px;
+  --spacing-md: 14px;
+  --spacing-lg: 18px;
+  --spacing-xl: 24px;
+  --spacing-2xl: 32px;
+
+  --transition: 220ms ease;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
+/* Shell */
+.appShell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--white); /* fondo blanco */
+}
+
+/* ===== Sidebar (off-canvas) ===== */
 .sidebar {
-  background-color: var(--gray-900);
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 260px;
+  height: 100vh;
+  background-color: var(--gray-900); /* gris oscuro */
   color: var(--white);
-  width: 250px;
-  transition: width var(--transition-base);
-  overflow: hidden;
-  border-right: 3px solid var(--primary-red);
   display: flex;
   flex-direction: column;
+  will-change: transform;
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  transition: transform var(--transition);
+  transform: translateX(-100%); /* oculto por defecto */
 }
 
-.sidebar.closed {
-  width: 80px;
+/* Estados explícitos: PRIORIDAD ALTA POR ESPECIFICIDAD */
+.sidebar.sidebarOpen {
+  transform: translateX(0);
 }
 
+.sidebar.sidebarClosed {
+  transform: translateX(-100%);
+}
+
+/* header del sidebar */
 .logo {
   padding: var(--spacing-xl);
-  border-bottom: 2px solid var(--primary-red);
   text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .logo h1 {
-  font-size: var(--font-xl);
-  color: var(--primary-red);
   margin: 0;
+  font-size: var(--font-xl);
+  color: #fff;
+  font-weight: 800;
 }
 
+/* navegación */
 .nav {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-sm);
+  gap: 8px;
   padding: var(--spacing-lg) var(--spacing-md);
   flex: 1;
+  overflow-y: auto;
 }
 
-.nav-link {
+.navLink {
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
-  padding: var(--spacing-md) var(--spacing-lg);
-  color: var(--gray-400);
-  border-radius: var(--rounded-lg);
-  transition: all var(--transition-base);
-  white-space: nowrap;
-}
-
-.nav-link:hover {
-  background-color: var(--gray-800);
-  color: var(--white);
-}
-
-.nav-link.active {
-  background-color: var(--primary-red);
-  color: var(--white);
+  gap: 12px;
+  padding: 12px 14px;
+  text-decoration: none;
+  color: #fff;                 /* texto blanco */
   font-weight: 600;
+  border-radius: var(--rounded-lg);
+  transition: background var(--transition), transform var(--transition);
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.navLink.active,
+.active {
+  background: rgba(255, 255, 255, 0.14); /* activo sutil gris claro */
 }
 
 .icon {
-  font-size: var(--font-lg);
-  min-width: 24px;
-  text-align: center;
+  font-size: 20px;
+  min-width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .label {
   font-size: var(--font-sm);
 }
 
-.main-content {
+/* Overlay móvil/desktop cuando el menú está abierto */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  z-index: 900;
+}
+
+/* ===== Main ===== */
+.mainContent {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  width: 100%;
+  background-color: var(--white);
 }
 
-.top-bar {
+.topBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -89,55 +150,57 @@
   padding: var(--spacing-md) var(--spacing-xl);
   height: 70px;
   box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.toggle-sidebar {
-  background-color: transparent;
-  color: var(--primary-red);
+.toggleSidebar {
+  background: transparent;
+  color: var(--gray-700);
   font-size: var(--font-2xl);
   cursor: pointer;
   padding: var(--spacing-sm);
-  transition: color var(--transition-base);
+  border: none;
+  line-height: 1;
+  transition: transform var(--transition), opacity var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.toggle-sidebar:hover {
-  color: var(--dark-red);
+.toggleSidebar:hover {
+  transform: scale(1.06);
+  opacity: 0.9;
 }
 
-.header-right {
+.headerRight {
   display: flex;
   align-items: center;
-  gap: var(--spacing-lg);
+  gap: 16px;
 }
 
-.user-info {
+.userInfo {
   font-size: var(--font-sm);
-  color: var(--gray-700);
-  font-weight: 500;
+  color: var(--gray-600);
+  font-weight: 600;
 }
 
 .content {
-  flex: 1;
+  min-height: calc(100vh - 70px);
   overflow-y: auto;
   padding: var(--spacing-2xl);
-  background-color: var(--gray-50);
+  background-color: var(--white);
 }
 
-@media (max-width: 768px) {
+/* ===== Responsive ===== */
+/* Si quieres que en desktop inicie abierto por defecto, NO fuerces el transform aquí.
+   El estado inicial ya lo maneja React con useState(true).
+   Solo puedes ajustar comportamientos opcionales. */
+
+@media (min-width: 1024px) {
+  /* Ejemplo opcional: aumentar ancho del panel en pantallas grandes */
   .sidebar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    height: 100vh;
-    z-index: 100;
-  }
-
-  .sidebar.closed {
-    transform: translateX(-100%);
-    width: 250px;
-  }
-
-  .content {
-    padding: var(--spacing-lg);
+    width: 280px;
   }
 }

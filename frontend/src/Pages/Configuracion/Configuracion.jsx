@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { FiPlus, FiTrash2, FiSave } from "react-icons/fi";
+import styles from "./Configuracion.module.css";
 
 export default function Configuracion() {
   const [config, setConfig] = useState(null);
@@ -6,7 +8,6 @@ export default function Configuracion() {
   const [saving, setSaving] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-  // Cargar configuración al montar el componente
   useEffect(() => {
     fetch(`${API_URL}/config`)
       .then((res) => res.json())
@@ -20,7 +21,6 @@ export default function Configuracion() {
       });
   }, []);
 
-  // --- Funciones genéricas para arrays (salsas, papas, bebidas) ---
   const handleChangeArray = (field, index, value) => {
     const newArray = [...config[field]];
     newArray[index] = value;
@@ -36,7 +36,6 @@ export default function Configuracion() {
     setConfig({ ...config, [field]: newArray });
   };
 
-  // --- Precios ---
   const handleChangePrecio = (e) => {
     const { name, value } = e.target;
     setConfig((prev) => ({
@@ -45,7 +44,6 @@ export default function Configuracion() {
     }));
   };
 
-  // --- Guardar cambios en el backend ---
   const handleSave = async () => {
     try {
       setSaving(true);
@@ -65,90 +63,125 @@ export default function Configuracion() {
     }
   };
 
-  if (loading) return <p>Cargando configuración...</p>;
-  if (!config) return <p>Error al cargar configuración.</p>;
+  if (loading) return <p className={styles.loading}>Cargando configuración...</p>;
+  if (!config) return <p className={styles.error}>Error al cargar configuración.</p>;
 
-  // --- Helper para renderizar tablas dinámicas ---
   const renderTable = (title, field) => (
-    <div style={{ marginBottom: "2rem" }}>
-      <h2>{title}</h2>
-      <table border="1" cellPadding="8" style={{ width: "100%", marginBottom: "1rem" }}>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Nombre</th>
-            <th>Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {config[field].map((item, i) => (
-            <tr key={i}>
-              <td>{i + 1}</td>
-              <td>
-                <input
-                  type="text"
-                  value={item}
-                  onChange={(e) => handleChangeArray(field, i, e.target.value)}
-                  style={{ width: "100%" }}
-                />
-              </td>
-              <td>
-                <button onClick={() => handleRemoveArrayItem(field, i)}>❌</button>
-              </td>
+    <div className={styles.card}>
+      <h2 className={styles.cardTitle}>{title}</h2>
+
+      <div className={styles.tableWrap}>
+        <table className={styles.table} role="table" aria-label={`Tabla de ${title}`}>
+          <thead>
+            <tr role="row">
+              <th className={styles.colIndex}>#</th>
+              <th>Nombre</th>
+              <th className={styles.colAction}>Acción</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <button onClick={() => handleAddArrayItem(field)}>➕ Agregar {title.slice(0, -1)}</button>
+          </thead>
+          <tbody>
+            {config[field].map((item, i) => (
+              <tr key={i} role="row">
+                <td className={styles.center}>{i + 1}</td>
+                <td>
+                  <input
+                    type="text"
+                    value={item}
+                    onChange={(e) => handleChangeArray(field, i, e.target.value)}
+                    className={styles.input}
+                    placeholder="Escribe un nombre…"
+                  />
+                </td>
+                <td className={styles.center}>
+                  <button
+                    type="button"
+                    className={styles.btnDelete}
+                    aria-label={`Eliminar ${item || `fila ${i + 1}`}`}
+                    title="Eliminar"
+                    onClick={() => handleRemoveArrayItem(field, i)}
+                  >
+                    <FiTrash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ÚNICO botón de agregar abajo */}
+      <button
+        type="button"
+        className={styles.tableAddBtn}
+        onClick={() => handleAddArrayItem(field)}
+      >
+        <FiPlus size={16} /> <span>Agregar {title.slice(0, -1)}</span>
+      </button>
     </div>
   );
 
   return (
-    <div style={{ padding: "2rem", maxWidth: "800px", margin: "auto" }}>
-      <h1>⚙️ Configuración del Menú</h1>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1>Configuración del Menú</h1>
+        <p>Administra opciones y precios del menú</p>
+      </div>
 
-      {renderTable("Salsas", "salsas")}
-      {renderTable("Papas", "papas")}
-      {renderTable("Bebidas", "bebidas")}
+      {/* 3 columnas en una sola línea */}
+      <div className={styles.grid}>
+        {renderTable("Salsas", "salsas")}
+        {renderTable("Papas", "papas")}
+        {renderTable("Bebidas", "bebidas")}
+      </div>
 
-      <h2>Precios</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-        <label>
-          Combo sin bebida:
+      <div className={styles.prices}>
+        <h2>Precios</h2>
+        <label className={styles.priceItem}>
+          <span>Combo sin bebida</span>
           <input
             type="number"
             name="comboSinBebida"
             value={config.precios.comboSinBebida}
             onChange={handleChangePrecio}
+            className={styles.input}
+            placeholder="0"
           />
         </label>
-        <label>
-          Combo con bebida:
+        <label className={styles.priceItem}>
+          <span>Combo con bebida</span>
           <input
             type="number"
             name="comboConBebida"
             value={config.precios.comboConBebida}
             onChange={handleChangePrecio}
+            className={styles.input}
+            placeholder="0"
           />
         </label>
-        <label>
-          Salsa extra:
+        <label className={styles.priceItem}>
+          <span>Salsa extra</span>
           <input
             type="number"
             name="salsaExtra"
             value={config.precios.salsaExtra}
             onChange={handleChangePrecio}
+            className={styles.input}
+            placeholder="0"
           />
         </label>
       </div>
 
-      <button
-        style={{ marginTop: "1.5rem", padding: "10px 20px", fontSize: "16px" }}
-        onClick={handleSave}
-        disabled={saving}
-      >
-        {saving ? "Guardando..." : "💾 Guardar Cambios"}
-      </button>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={styles.btnPrimary}
+          onClick={handleSave}
+          disabled={saving}
+        >
+          <FiSave size={16} />
+          <span>{saving ? "Guardando..." : "Guardar Cambios"}</span>
+        </button>
+      </div>
     </div>
   );
 }

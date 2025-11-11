@@ -1,157 +1,216 @@
 @import '../../styles/variables.css';
 
+:root { --transition-base: 150ms ease; }
+
+:global(html), :global(body) {
+  background: var(--gray-50);
+  color: var(--gray-900);
+}
+
+/* ===== Layout ===== */
 .container {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
+  gap: var(--spacing-xl); /* reducido */
+  padding: var(--spacing-xl); /* reducido */
+  max-width: 1200px; /* un poco más ancho para 3 columnas */
+  margin: 0 auto;
 }
 
-.header {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.header h1 {
-  font-size: var(--font-2xl);
-  color: var(--gray-900);
-  margin: 0;
-}
-
-.header p {
-  color: var(--gray-500);
-  font-size: var(--font-sm);
-  margin: 0;
-}
-
-.addForm {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-xl);
-  background-color: var(--white);
-  border-radius: var(--rounded-lg);
-  box-shadow: var(--shadow-sm);
-  align-items: flex-end;
-}
-
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
-}
-
-.formGroup label {
-  font-size: var(--font-sm);
-  font-weight: 500;
-  color: var(--gray-700);
-}
-
-.input {
-  padding: var(--spacing-md);
-  border: 1px solid var(--gray-300);
-  border-radius: var(--rounded-md);
-  font-size: var(--font-sm);
-  transition: border-color var(--transition-base);
-}
-
-.input:focus {
-  outline: none;
-  border-color: var(--primary-red);
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-}
-
-.btnPrimary {
-  padding: var(--spacing-md) var(--spacing-xl);
-  background-color: var(--primary-red);
-  color: var(--white);
-  border-radius: var(--rounded-md);
-  font-weight: 600;
-  font-size: var(--font-sm);
-  transition: background-color var(--transition-base);
-  cursor: pointer;
-}
-
-.btnPrimary:hover {
-  background-color: var(--dark-red);
-}
+.header { display: flex; flex-direction: column; gap: var(--spacing-xs, 6px); }
+.header h1 { font-size: var(--font-xl); margin: 0; }          /* reducido */
+.header p  { color: var(--gray-500); font-size: var(--font-xs, 12px); margin: 0; }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: var(--spacing-lg);
+  grid-template-columns: repeat(3, 1fr); /* Fuerza 3 columnas */
+  gap: var(--spacing-md); /* reducido */
 }
 
+/* ===== Cards ===== */
 .card {
-  background-color: var(--white);
-  padding: var(--spacing-xl);
+  background: var(--white);
   border-radius: var(--rounded-lg);
   box-shadow: var(--shadow-sm);
-}
-
-.card h2 {
-  font-size: var(--font-lg);
-  margin: 0 0 var(--spacing-lg) 0;
-  color: var(--gray-900);
-  border-bottom: 2px solid var(--primary-red);
-  padding-bottom: var(--spacing-md);
-}
-
-.list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+  padding: var(--spacing-lg); /* reducido */
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  min-width: 0; /* evita overflow */
 }
 
-.list li {
-  display: flex;
-  justify-content: space-between;
+.cardHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: var(--spacing-sm);
+}
+
+.card h2 {
+  font-size: var(--font-md); /* reducido */
+  margin: 0;
+  color: var(--gray-900);
+  border-bottom: 1px solid var(--gray-200); /* más sutil */
+  padding-bottom: var(--spacing-sm);
+}
+
+/* ===== Tabla minimal ===== */
+.tableWrap {
+  border: 1px solid var(--gray-200);
+  border-radius: var(--rounded-md); /* menos redondeo */
+  overflow: hidden;
+  background: var(--white);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: var(--font-xs, 12px); /* compacto */
+}
+
+.table thead { background: var(--gray-100); }
+
+.table th,
+.table td {
+  padding: 8px 10px; /* compacto */
+  border-bottom: 1px solid var(--gray-200);
+  vertical-align: middle;
+}
+
+.table tbody tr:hover { background: var(--gray-50); }
+
+.colIndex { width: 44px; text-align: center; }
+.colAction { width: 72px; text-align: center; }
+.center { text-align: center; }
+
+/* Inputs */
+.input {
+  width: 100%;
+  padding: 8px 10px; /* compacto */
+  border: 1px solid var(--gray-300);
+  border-radius: var(--rounded-sm);
+  font-size: var(--font-xs, 12px);
+  background: var(--white);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+.input:focus {
+  outline: none;
+  border-color: var(--primary-red);
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.1);
+}
+
+/* Botones */
+.btnGhost{
+  background: transparent;
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+  border-radius: var(--rounded-sm);
+  height: 30px;
+  width: 30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition: all var(--transition-base);
+}
+.btnGhost:hover{ background: var(--primary-red); color: var(--white); }
+
+.btnDelete {
+  background: transparent;
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+  border-radius: var(--rounded-sm);
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
   align-items: center;
-  padding: var(--spacing-md);
-  background-color: var(--gray-50);
-  border-radius: var(--rounded-md);
-  transition: background-color var(--transition-base);
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.btnDelete:hover { background: var(--primary-red); color: var(--white); }
+
+.tableAddBtn {
+  margin-top: var(--spacing-sm);
+  padding: 6px 10px;
+  gap: 6px;
+  background-color: var(--white);
+  color: var(--primary-red);
+  border: 1px solid var(--primary-red);
+  border-radius: var(--rounded-sm);
+  font-weight: 600;
+  font-size: var(--font-xs, 12px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+.tableAddBtn:hover { background-color: var(--light-red); }
+
+/* ===== Precios ===== */
+.prices {
+  background: var(--white);
+  border-radius: var(--rounded-lg);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg); /* reducido */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm); /* reducido */
 }
 
-.list li:hover {
-  background-color: var(--light-red);
+.prices h2 {
+  font-size: var(--font-md);
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--gray-900);
+  border-bottom: 1px solid var(--gray-200);
+  padding-bottom: var(--spacing-sm);
 }
 
-.list li span {
+.priceItem {
+  display: grid;
+  grid-template-columns: 1fr 160px; /* compacto */
+  gap: var(--spacing-sm);
+  align-items: center;
   font-size: var(--font-sm);
   color: var(--gray-700);
 }
 
-.btnDelete {
-  background-color: transparent;
-  color: var(--primary-red);
-  border: 1px solid var(--primary-red);
-  border-radius: var(--rounded-sm);
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-sm);
-  cursor: pointer;
-  transition: all var(--transition-base);
-}
+/* ===== Acciones ===== */
+.actions { margin-top: var(--spacing-lg); }
 
-.btnDelete:hover {
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px; /* compacto */
   background-color: var(--primary-red);
   color: var(--white);
+  border: none;
+  border-radius: var(--rounded-md);
+  font-weight: 600;
+  font-size: var(--font-sm);
+  transition: background-color var(--transition-base), transform var(--transition-base);
+  cursor: pointer;
 }
+.btnPrimary:hover { background-color: var(--dark-red); }
+.btnPrimary:active { transform: translateY(1px); }
+.btnPrimary:disabled { opacity: .7; cursor: not-allowed; }
 
-@media (max-width: 768px) {
-  .addForm {
-    grid-template-columns: 1fr;
-    align-items: stretch;
-  }
+/* ===== Mensajes ===== */
+.loading, .error { color: var(--gray-700); font-size: var(--font-sm); }
 
-  .grid {
-    grid-template-columns: 1fr;
-  }
+/* ===== Responsive ===== */
+@media (max-width: 1060px) {
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 900px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr; }
+  .priceItem { grid-template-columns: 1fr; }
+  .colIndex { width: 38px; }
+  .colAction { width: 64px; }
 }

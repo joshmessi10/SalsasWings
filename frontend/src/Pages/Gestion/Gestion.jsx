@@ -104,7 +104,7 @@ const Gestion = () => {
       <div className={styles.grid}>
         {/* === GASTOS === */}
         <div className={styles.section}>
-          <h2>💸 Gastos (Egresos)</h2>
+          <h2>Gastos (Egresos)</h2>
           <div className={styles.addExpenseForm}>
             <input
               type="text"
@@ -158,7 +158,7 @@ const Gestion = () => {
 
         {/* === INVENTARIO LÓGICO === */}
         <div className={styles.section}>
-          <h2>📊 Resumen de Producción</h2>
+          <h2>Resumen de Producción</h2>
           <table className={styles.table}>
             <tbody>
               <tr>
