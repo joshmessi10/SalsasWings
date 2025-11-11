@@ -1,4 +1,3 @@
-import { get, post, put, API } from "../../lib/api";
 import { useEffect, useState } from "react";
 
 export default function Configuracion() {
@@ -9,7 +8,7 @@ export default function Configuracion() {
 
   // Cargar configuración al montar el componente
   useEffect(() => {
-    get("/config")
+    fetch(`${API_URL}/config`)
       .then((res) => res.json())
       .then((data) => {
         setConfig(data);
@@ -50,7 +49,7 @@ export default function Configuracion() {
   const handleSave = async () => {
     try {
       setSaving(true);
-      const res = await get("/config", {
+      const res = await fetch(`${API_URL}/config`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
